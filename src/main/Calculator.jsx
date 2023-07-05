@@ -1,4 +1,4 @@
-import React, {Component, useState} from "react";
+import React, { Component, useState } from "react";
 import './Calculator.css';
 import Button from "../components/Button";
 import Display from "../components/Display";
@@ -25,15 +25,46 @@ export default class Calculator extends Component {
 
     clearMemory() {
         this.setState({ ...initialState })
+        //faz o display voltar ao estado inicial
     }
 
     setOperation(operation) {
-        console.log(operation)
+        if (this.state.current === 0) {
+            this.setState({ operation, current: 1, clearDisplay: true })
+        }//botao passa para o segundo indice do array, salvando o primeiro indice e limpando display
+        else {
+            const equals = operation === '='
+            const currentOperation = this.state.operation
+            const values = [...this.state.values]
+
+            let result;
+            if (currentOperation === '+') {
+                result = values[0] + values[1];
+            } else if (currentOperation === '-') {
+                result = values[0] - values[1];
+            } else if (currentOperation === '*') {
+                result = values[0] * values[1];
+            } else if (currentOperation === '/') {
+                result = values[0] / values[1];
+            } else {
+                alert('Operação inválida')
+            }
+            values[0] = result //esta lógica confere qual operação está sendo utilizada de acordo com o botao
+            values[1] = 0
+
+            this.setState({
+                displayValue: values[0],
+                operation: equals ? null : operation,
+                current: equals ? 0 : 1,
+                clearDisplay: !equals,
+                values
+            })
+        }
     }
 
     addDigit(n) {
-        if(n === '.' && this.state.displayValue.includes('.')){
-            return 
+        if (n === '.' && this.state.displayValue.includes('.')) {
+            return
         }
         //aqui eu evito que possa existir dois pontos '.' no valor do display da calculadora 
 
@@ -45,18 +76,22 @@ export default class Calculator extends Component {
         const displayValue = currentValue + n
         this.setState({ displayValue, clearDisplay: false })
 
-        if(n !== '.'){
+        if (n !== '.') {
             const i = this.state.current
             const newValue = parseFloat(displayValue) //conversao do valor recebido em string para float
-            const values =  [...this.state.values]
+            const values = [...this.state.values]
             values[i] = newValue
             this.setState({ values })
-        }
-    }
-    
-    render(){
 
-        return(
+            console.log(values)
+
+        }
+
+    }
+
+    render() {
+
+        return (
             <div className="calculator">
                 <Display value={this.state.displayValue}></Display>
                 <Button label="AC" click={this.clearMemory} triple></Button>
